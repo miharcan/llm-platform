@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+qdrant-client
+pydantic
+python-jose[cryptography]
+passlib[bcrypt]
+rank-bm25
+tiktoken
+python-dotenv
+httpx
+
