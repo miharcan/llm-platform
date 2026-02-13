@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from app.api.routes import router
+from app.middleware.request_id import add_request_id
 
 app = FastAPI(title="LLM Platform Blueprint")
+app.middleware("http")(add_request_id)
 
 app.include_router(router)
 
