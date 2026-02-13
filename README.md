@@ -1,143 +1,182 @@
-# LLM Platform Blueprint
+# LLM Platform -- Multi-Tenant RAG with Observability & Audit Logging
 
 A production-oriented, multi-tenant Retrieval-Augmented Generation (RAG)
-platform built with FastAPI and Qdrant.
+platform built with:
+
+-   FastAPI
+-   Qdrant (vector store)
+-   PostgreSQL (audit logging)
+-   Sentence-Transformers
+-   Docker & Docker Compose
 
 ------------------------------------------------------------------------
 
-## Overview
+## 🚀 Overview
 
-This project demonstrates a scalable, compliance-aware LLM
-infrastructure foundation designed for multi-tenant environments.
+This platform enables:
 
-It includes:
-
--   Dockerized FastAPI service
--   Qdrant vector database with persistent storage
--   Tenant and country-level metadata filtering
--   Vector-based retrieval layer
--   Generation abstraction layer
--   Clean modular architecture
--   Container networking and volume persistence
+-   Multi-tenant document ingestion
+-   Hybrid semantic retrieval (vector-based)
+-   LLM-powered answer generation
+-   Structured logging
+-   Token cost estimation
+-   Persistent audit logging (Postgres)
+-   Fully containerized infrastructure
 
 ------------------------------------------------------------------------
 
-## Architecture
+## 🏗 Architecture
 
-    Client
-      ↓
-    FastAPI Gateway
-      ↓
-    RAG Orchestrator
-      ├── Dense Retrieval (Qdrant)
-      ├── Metadata Filtering (tenant + country)
-      ├── Generator Layer
-      ↓
-    Persistent Vector Storage (Docker Volume)
+### Components
 
-------------------------------------------------------------------------
+**API (FastAPI)** - `/ingest` -- ingest tenant-specific documents -
+`/query` -- retrieve + generate answers - `/audit` -- view stored query
+audit events - `/health` -- service health check
 
-## Key Features
+**Qdrant** - Stores embeddings - Persistent storage via Docker volume
 
-### Multi-Tenant Isolation
-
-Each document is stored with: - `tenant_id` - `country`
-
-All queries enforce strict metadata filtering to prevent cross-tenant
-data leakage.
-
-### Persistent Storage
-
-Qdrant runs with a Docker volume:
-
-    volumes:
-      - qdrant_data:/qdrant/storage
-
-Vector data survives container restarts.
-
-### Modular Design
-
-    app/
-      api/
-      rag/
-      retrieval/
-      embeddings/
-      cost/
-      monitoring/
-
-Clear separation between ingestion, retrieval, and generation.
+**PostgreSQL** - Stores structured audit logs - Captures request ID,
+latency, cost, tenant, country, query
 
 ------------------------------------------------------------------------
 
-## Running the Project
+## 🔍 Core Features
 
-### 1. Start Services
+### ✅ Multi-Tenant RAG
 
-    docker compose up --build
+Documents are stored with metadata: - tenant_id - country
 
-### 2. Open Swagger
+Retrieval is filtered accordingly.
 
-    http://localhost:8000/docs
+------------------------------------------------------------------------
 
-### 3. Ingest Example
+### ✅ Observability
+
+Each query captures: - request_id (middleware-generated UUID) -
+latency_seconds - estimated_token_cost - number_of_sources
+
+Structured logs are emitted in JSON format.
+
+------------------------------------------------------------------------
+
+### ✅ Audit Logging (Postgres)
+
+Every query is persisted in `audit_events` table.
+
+Schema includes: - timestamp - request_id - tenant_id - country -
+query - latency_seconds - estimated_cost - num_sources
+
+------------------------------------------------------------------------
+
+### ✅ Cost Estimation
+
+Token cost is estimated using `tiktoken` before generation to simulate
+LLM cost tracking.
+
+------------------------------------------------------------------------
+
+## 🐳 Running the System
+
+### 1. Build
+
+``` bash
+docker compose build --no-cache
+```
+
+### 2. Start
+
+``` bash
+docker compose up
+```
+
+Services: - API → http://localhost:8000 - Qdrant →
+http://localhost:6333/dashboard - Postgres → port 5432
+
+------------------------------------------------------------------------
+
+## 📥 Example Usage
+
+### Ingest
 
 ``` json
+POST /ingest
 {
   "tenant_id": "acme",
   "country": "PL",
-  "documents": [
-    "Poland probation period is 3 months"
-  ]
+  "documents": ["Poland probation period is 3 months"]
 }
 ```
 
-### 4. Query Example
+------------------------------------------------------------------------
+
+### Query
 
 ``` json
+POST /query
 {
   "tenant_id": "acme",
   "country": "PL",
-  "query": "probation"
+  "query": "probation in Poland"
 }
 ```
 
-Expected response:
+Response:
 
 ``` json
 {
   "tenant": "acme",
   "country": "PL",
-  "answer": "Based on retrieved documents: Poland probation period is 3 months",
-  "sources": [
-    "Poland probation period is 3 months"
-  ]
+  "answer": "...",
+  "sources": [...]
 }
 ```
 
 ------------------------------------------------------------------------
 
-## Production Considerations
+### View Audit Logs
 
--   Replace stub embeddings with sentence-transformers or OpenAI
-    embeddings
--   Add structured logging and request IDs
--   Add cost tracking per tenant
--   Add evaluation pipeline for retrieval accuracy
--   Implement RBAC and authentication middleware
--   Add observability (Prometheus / tracing)
+``` bash
+GET /audit
+```
 
 ------------------------------------------------------------------------
 
-## Roadmap
+## 🧠 Engineering Practices Applied
 
--   Hybrid retrieval (BM25 + dense)
--   Re-ranking layer
+-   Feature branching workflow
+-   Pull request discipline (even solo)
+-   Dockerized ML environment
+-   Structured logging
+-   Separation of concerns (API / RAG / DB / Monitoring)
+-   Persistent vector storage
+-   Cost-awareness simulation
+
+------------------------------------------------------------------------
+
+## 📌 Future Enhancements
+
+-   Alembic migrations
+-   RBAC enforcement
+-   CI/CD (GitHub Actions)
+-   LLM provider abstraction
+-   Evaluation pipeline
 -   Streaming responses
--   Audit logging
--   LLM-based evaluation endpoint
+-   GDPR retention controls
 
 ------------------------------------------------------------------------
 
-## License
+## 🎯 Purpose
 
-MIT
+This repository demonstrates how to build a production-style AI platform
+rather than a simple demo chatbot. It reflects architectural thinking
+aligned with real-world AI infrastructure roles involving:
+
+-   RAG systems
+-   Observability
+-   Compliance-aware logging
+-   Scalable containerized deployment
+
+------------------------------------------------------------------------
+
+Built for learning, architectural growth, and production-oriented ML
+system design.
