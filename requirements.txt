@@ -8,5 +8,10 @@ rank-bm25
 tiktoken
 python-dotenv
 httpx
-sentence-transformers
-torch
+
+numpy<2
+torch==2.4.0
+sentence-transformers==2.7.0
+
+sqlalchemy
+psycopg2-binary
