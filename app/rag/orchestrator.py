@@ -4,6 +4,7 @@ from app.embeddings.provider import embed_text
 import uuid
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 
+
 def ingest_documents(tenant_id: str, country: str, documents: list[str]):
     points = []
 
@@ -26,6 +27,7 @@ def ingest_documents(tenant_id: str, country: str, documents: list[str]):
         points=points,
     )
 
+
 def retrieve(tenant_id: str, country: str, query: str, top_k: int = 3):
     vector = embed_text(query)
 
@@ -47,7 +49,16 @@ def retrieve(tenant_id: str, country: str, query: str, top_k: int = 3):
         ),
     )
 
-    dense_docs = [hit.payload["text"] for hit in dense_results.points]
+    seen = set()
+    results = []
 
-    # Simple hybrid: merge unique
-    return list(set(dense_docs))
+    for hit in dense_results.points:
+        text = hit.payload["text"]
+        if text not in seen:
+            seen.add(text)
+            results.append({
+                "text": text,
+                "score": hit.score
+            })
+
+    return results

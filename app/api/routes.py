@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from app.rag.orchestrator import ingest_documents, retrieve
 from app.retrieval.dense import ensure_collection
+from app.rag.generator import generate_answer
 
 
 router = APIRouter()
@@ -30,13 +31,11 @@ async def ingest_endpoint(request: IngestRequest):
     return {"status": "ingested"}
 
 
-from app.rag.generator import generate_answer
-
 @router.post("/query")
 async def query_endpoint(request: QueryRequest):
     ensure_collection()
     docs = retrieve(request.tenant_id, request.country, request.query)
-    answer = generate_answer(request.query, docs)
+    answer = generate_answer(request.query, [d["text"] for d in docs])
 
     return {
         "tenant": request.tenant_id,

@@ -8,4 +8,5 @@ rank-bm25
 tiktoken
 python-dotenv
 httpx
-
+sentence-transformers
+torch
