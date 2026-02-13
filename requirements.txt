@@ -10,3 +10,5 @@ python-dotenv
 httpx
 sentence-transformers
 torch
+sqlalchemy
+psycopg2-binary
