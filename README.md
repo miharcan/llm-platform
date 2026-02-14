@@ -87,6 +87,14 @@ Scopes are validated per-endpoint to enforce least-privilege access.
 
 ------------------------------------------------------------------------
 
+## Operational Endpoints
+
+- GET /health → readiness check
+- POST /query → document querying
+- POST /ingest → document ingestion
+
+------------------------------------------------------------------------
+
 ## 🐳 Running the System
 
 ### 1. Build

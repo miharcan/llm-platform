@@ -58,7 +58,6 @@ async def query_endpoint(
     user=Depends(scope_required("read:documents")),
 ):
 
-
     if user.get("tenant_id") != request.tenant_id:
         forbidden("Access denied: tenant mismatch")
 
@@ -101,3 +100,18 @@ async def query_endpoint(
 @router.get("/audit")
 def get_audit():
     return audit_log
+
+
+@router.get("/health")
+def health():
+    try:
+        ensure_collection()
+        db_status = "ok"
+    except Exception:
+        db_status = "error"
+
+    return {
+        "status": "ok",
+        "service": "llm-platform",
+        "vector_store": db_status,
+    }
