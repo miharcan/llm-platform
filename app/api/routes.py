@@ -11,7 +11,7 @@ from app.cost.tracker import estimate_token_cost
 from app.monitoring.audit import audit_log
 from fastapi import Depends
 from app.security.dependencies import get_current_user
-
+from app.security.exceptions import forbidden
 
 router = APIRouter()
 
@@ -49,11 +49,14 @@ async def ingest_endpoint(request: IngestRequest,
 @router.post("/query")
 async def query_endpoint(request: QueryRequest, req: Request,
                          user=Depends(get_current_user)):
+    # if user.get("tenant_id") != request.tenant_id:
+    #     raise HTTPException(
+    #         status_code=403,
+    #         detail="Access denied: tenant mismatch",
+    #     )
+
     if user.get("tenant_id") != request.tenant_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: tenant mismatch",
-        )
+        forbidden("Access denied: tenant mismatch")
 
     ensure_collection()
 
