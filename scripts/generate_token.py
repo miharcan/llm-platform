@@ -8,9 +8,10 @@ ALGORITHM = "HS256"
 payload = {
     "sub": "user1",
     "tenant_id": "acme",
-    "role": "admin",
+    "scopes": ["read:documents", "write:documents"],
     "exp": datetime.utcnow() + timedelta(hours=1),
 }
+
 
 token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 

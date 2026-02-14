@@ -75,6 +75,18 @@ LLM cost tracking.
 
 ------------------------------------------------------------------------
 
+## Authorization Model
+
+The platform uses JWT-based fine-grained authorization via scopes.
+
+Examples:
+- read:documents → allows querying tenant knowledge base
+- write:documents → allows ingesting new documents
+
+Scopes are validated per-endpoint to enforce least-privilege access.
+
+------------------------------------------------------------------------
+
 ## 🐳 Running the System
 
 ### 1. Build

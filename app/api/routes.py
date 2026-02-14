@@ -12,6 +12,7 @@ from app.monitoring.audit import audit_log
 from fastapi import Depends
 from app.security.dependencies import get_current_user
 from app.security.exceptions import forbidden
+from app.security.scopes import require_scope
 
 router = APIRouter()
 
@@ -32,28 +33,31 @@ class IngestRequest(BaseModel):
     country: str
     documents: list[str]
 
+def scope_required(scope: str):
+    def dependency(user=Depends(get_current_user)):
+        require_scope(user, scope)
+        return user
+    return dependency
+
 
 @router.post("/ingest")
-async def ingest_endpoint(request: IngestRequest,
-                          user=Depends(get_current_user)):
-    if user.get("role") != "admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Insufficient permissions",
-        )
+async def ingest_endpoint(
+    request: IngestRequest,
+    user=Depends(scope_required("write:documents")),
+):
     ensure_collection()
     ingest_documents(request.tenant_id, request.country, request.documents)
     return {"status": "ingested"}
 
 
+
 @router.post("/query")
-async def query_endpoint(request: QueryRequest, req: Request,
-                         user=Depends(get_current_user)):
-    # if user.get("tenant_id") != request.tenant_id:
-    #     raise HTTPException(
-    #         status_code=403,
-    #         detail="Access denied: tenant mismatch",
-    #     )
+async def query_endpoint(
+    request: QueryRequest,
+    req: Request,
+    user=Depends(scope_required("read:documents")),
+):
+
 
     if user.get("tenant_id") != request.tenant_id:
         forbidden("Access denied: tenant mismatch")
