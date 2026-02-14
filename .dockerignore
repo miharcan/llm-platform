@@ -3,4 +3,5 @@ __pycache__/
 .git
 .env
 .venv
+.venv311
 
